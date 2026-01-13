@@ -49,6 +49,8 @@ https://www.man7.org/linux/man-pages/man2/execve.2.html
 https://www.codestudy.net/blog/how-do-i-parse-command-line-arguments-in-bash/
 https://stackoverflow.com/questions/71333156/pathname-vs-arguments-for-execve-parameters
 https://shunchild.com/article/will-valies-in-parent-process-be-altered-by-chile-process
+https://www.geeksforgeeks.org/c/fork-system-call/
+https://www.geeksforgeeks.org/c/wait-system-call-c/
 man env
 man execve
 man fork
@@ -114,14 +116,60 @@ If you noticed it, yes, we passed args as the second argument, meaning we also p
 pid_t fork(void)
 ```
 Let's decompose this function :
+
 **What it does :**
 *"creates a new process by duplicating the calling process.  The new process is referred to as the child process. The calling process is referred to as the parent process."*
 
 Bacically, it creates a **child process** of the **current program**. The child process inherits the **COPY** of the parent's memory space, including variables.
+
 **HOWEVER, BE CAREFUL !!** The child parent have only a **COPY** of its parent, it **cannot modify the content of its parent** (the inheritance just copies, it doesn't create a shared memory space!).
 
 **Parameters :** 
 void : no parameters needed.
+
+Example of use of fork : 
+
+```c
+#include <stdio.h> //printf, puts
+#include <stdlib.h> //EXIT_FAILURE, EXIT_SUCCESS
+#include <unistd.h> //fork 
+#include <sys/types.h> //pid_t instead of __pid_t
+
+int main(void) {
+    pid_t pid;
+
+    pid = fork();
+    switch (pid) {
+        case -1: // Child creation process got an error 
+            perror("fork");
+            exit(EXIT_FAILURE);
+        case 0: // Child is created. We are in child's process    
+            printf("Currently child process with PID : %d\n",getpid());
+            puts("Child exiting.");
+            exit(EXIT_SUCCESS);
+       default: // We are in parent's process
+            printf("Currently parent process with PID : %d\n",getpid());
+            puts("Parent exiting.");
+    }
+    puts("Now the program is gone.");
+    exit(EXIT_SUCCESS);
+}
+```
+*This is the code (slightly modified for easier understanding) in the official documentation of man fork.*
+
+So, fork **returns* a **pid_t** value (which is a kind of int), we need to stock this value in a variable (pid_t pid) so its easier for us to code.
+
+If fork() **returns -1** -> the child process creation has **failed**, you do not have your child process.
+
+if fork() **returns 0** -> The child is **created**, we can operate on it.
+
+if you launch this code, you'll notice two things :
+-child's program is actually in **case 0**.
+-child process will operate **after parent** program has finished.
+
+Good question now, can the child process operate before its parent process end ?
+
+And, yes, we can do it with wait() function
 
 ## Parsing : Transforming your command into an executable
 
