@@ -31,6 +31,8 @@ E.G : Docker, AWS CLI, PowerShell
 The Shell is a **program** that acts as an intermediary between the user and the kernel. Basically, it **interprets** commands and **communicates** with the kernel to execute user's commands. It's the interpreting and executing section.
 Please note that we do not see the shell at all in the CLI!
 
+***AND NOTE THAT THIS IS WHAT WE HAVE TO DEVELOP***
+
 E.G : bash, zsh, fish, this project!
 
 ## BASICALLY
@@ -51,13 +53,28 @@ https://stackoverflow.com/questions/71333156/pathname-vs-arguments-for-execve-pa
 https://shunchild.com/article/will-valies-in-parent-process-be-altered-by-chile-process
 https://www.geeksforgeeks.org/c/fork-system-call/
 https://www.geeksforgeeks.org/c/wait-system-call-c/
+https://www.delftstack.com/howto/c/wait-in-c/
+https://linuxvox.com/blog/why-should-we-check-wifexited-after-wait-in-order-to-kill-child-processes-in-linux-system-call/
+https://www.allinthedifference.com/difference-between-fgets-and-scanf/
+https://serverfault.com/questions/163371/linux-command-line-character-limit
+https://unix.stackexchange.com/questions/643777/is-there-any-limit-on-line-length-when-pasting-to-a-terminal-in-linuxhttps://stackoverflow.com/questions/69198577/linux-keyboard-terminal-kernel-input-buffer
+https://www.geeksforgeeks.org/c/buffer-in-c-programming/
 man env
 man execve
 man fork
+man wait
+man perror
+man fgets()
+
+#### Warning : Please focus on this part, its gonna be pretty technical.
 
 Let's say you want to do **ls -a**.
 
-There is basically 4 main steps for the shell to return what we want (in this case, the list of all the content in a directory) :
+There is basically 3 main steps for the shell to return what we want (in this case, the list of all the content in a directory) :
+
+-Getting user input
+-Parsing
+-Execution
 
 ### Input / Output : Getting your command and return something
 
@@ -65,16 +82,49 @@ When you enter the command line interface (bash) it invites you to type a comman
 
 What I mean by that is that the CLI doesn't perform any operation when it launches, it waits for your demand.
 
-The CLI in reality is "just" a while loop with strings input/output. It reads your input, send it to the shell and returns what the shell did with your input.
+The CLI in reality is "just" a **while loop** with strings as **input/output**. It reads your input, send it to the shell and returns what the shell did with your input.
+
+As for the input, we will use a buffer of **4096** caracters (char s[4096]). We are forced to have a **finite** size because of fgets() that we'll see just after..
+
+***Linux kernel terminal input buffer*** (N_TTY_BUF_SIZE) is defined as **4096**.
+So we're following that limit, its a safe and efficient method.
+
+We can read inputs with fgets. However fgets asks for multilple stuff : 
+-**const** __*char__ **_restrict_ _s** : The string
+-**int __n** : How many bytes we want to read, In our case, the size of the buffer **4096**
+-**FILE** *____restrict__ **__stream** : From which file, in our case, the standard input **stdio** (yes, standard input is a file like everything).
+
+**NOTE:** Linux kernel terminal input buffer (N_TTY_BUF_SIZE) has a limit of **4096** caracters.
+So we're following that limit, its a safe and efficient method.
+
+From these informations, we should get a base :
+
+```c
+#include <stdio.h>
+
+int main() {
+    while (1) { //Infinite loop
+        char s[4096]; //Buffer
+        printf("Input : ");
+        fgets(s,sizeof(s),stdin); //User types ls -a
+        
+        /*SHELL'S WORK
+        parsing
+        execution
+        whatever*/
+    }
+    return 0;
+}
+```
 
 So, as soon as you've sent the command, it's gonna be shell's work.
 
 ## Execution : The business
 
-So, you're gonna tell me : Doesn't we have to parse before the execution? So why do you talk about the execution before the parsing, are you okay?
+I know you're gonna tell me : Doesn't we have to parse before the execution? So why do you talk about the execution before the parsing, are you okay?
 
-Well, let me cook.
-Before talking about shell's actions, we need to know exactly 2 very important functions : execve() and fork()
+Well, let me tell you something.
+Before talking about any shell's actions, we need to learn about exactly 2 very important functions : execve() and fork()
 
 #### execve()
  
@@ -83,7 +133,8 @@ Before talking about shell's actions, we need to know exactly 2 very important f
 int execve(const char *pathname, char *const _Nullable argv[], char *const _Nullable envp[])
 ```
 
-Let's decompose this function :
+Let's break-down this function :
+
 **What it does :** 
 *"executes  the  program  referred  to  by  pathname.  This causes the program that is currently being run by the calling
 process to be replaced with a new program, with newly initialized stack, heap, and (initialized and uninitialized) data segments."*
@@ -91,10 +142,13 @@ process to be replaced with a new program, with newly initialized stack, heap, a
 Bacically, it replaces and executes the current program being run by the program mentionned by pathname
 
 **Parameters :**
-const char *pathname : Program to execute (e.g : ls)
-char *cons_Nullable argv[] : Arguments following the program (e.g : -a, -l, -o etc..)
-char *const_Nullable envp[] : String array of environment variables (execve will try to find pathname in all the environment variables in envp[])
-*Generally speaking, you'll pass __environ as envp[] parameter as its simpler and faster. __environ contains every environment variables of the shell.*
+-__const char *pathname__ : Program to execute (e.g : ls)
+
+-__char *cons_Nullable argv[]__ : Arguments following the program (e.g : -a, -l, -o etc..)
+
+-__char *const_Nullable envp[]__ : String array of environment variables (execve will 
+try to find pathname in all the environment variables in envp[])
+*Generally speaking, you'll pass **__environ** as envp[] parameter as its simpler and faster. __environ contains every environment variables of the shell.*
 
 Example of use of execve : 
 ```c
@@ -115,7 +169,7 @@ If you noticed it, yes, we passed args as the second argument, meaning we also p
 #include <unistd.h>
 pid_t fork(void)
 ```
-Let's decompose this function :
+Let's break-down this function :
 
 **What it does :**
 *"creates a new process by duplicating the calling process.  The new process is referred to as the child process. The calling process is referred to as the parent process."*
@@ -167,9 +221,66 @@ if you launch this code, you'll notice two things :
 -child's program is actually in **case 0**.
 -child process will operate **after parent** program has finished.
 
-Good question now, can the child process operate before its parent process end ?
+#### Child processes
 
-And, yes, we can do it with wait() function
+Question now, can the child process operate before its parent process end ?
+
+That's a good question, because, its good (and cool) to have a child process, but if it can only executes after the parent... Its a bit limited isn't it.
+
+And, yes, we can do it with wait() function, but be careful :
+
+```c
+#include <stdio.h> //printf, puts
+#include <stdlib.h> //EXIT_FAILURE, EXIT_SUCCESS
+#include <unistd.h> //fork 
+#include <sys/types.h> //pid_t instead of __pid_t
+#include <sys/wait.h>
+
+int main(void) {
+    pid_t pid;
+    pid = fork();
+    switch (pid) {
+        case -1: // Child creation process got an error 
+            perror("fork");
+            exit(EXIT_FAILURE); //Equivalent of exit(1)
+        case 0: // Child is created. We are in child's process    
+            printf("Currently child process with PID : %d\n",getpid());
+            sleep(2);
+            exit(EXIT_SUCCESS); //Equivalent of exit(0)
+       default: // We are in parent's process
+            puts("Actually parent process");
+            int status;
+            pid_t terminated_pid = wait(&status);
+            
+            if (terminated_pid == -1) { //Ensuring that any issues with waiting for the child process are handled nicely.
+                perror("wait failed");
+                return 1;
+            }
+            
+            if (WIFEXITED(status)) { // Checks if the child terminated normally (e.g : with exit() or returning from main)
+                /*
+                status value from wait() is a bitwise structure that
+                varies by Unix like system, WIFEXITED is a macro that can safely interprets it.
+                This macro is important to avoid misunderstanding of status!*/
+                printf("Child exited with status: %d\n", WEXITSTATUS(status));
+            }
+            printf("Parent process back with PID : %d\n",getpid());
+    }
+    puts("Now the program is gone.");
+    puts("Parent exiting.");
+    exit(EXIT_SUCCESS);
+}
+```
+
+When a child process terminates, it doesn't disappear, in fact, it enters in a **"zombie"** state where its process descriptor remains in the kernel until the parent acknowledge its death via 'wait()' or 'waitpid()'.
+This must happen because the child may return critical information to the parent, such as why it has terminated and its exit code.
+To do so, we must check wait() returning status. The thing is, status may vary by UNIX-like system, to safely interprets it, we must use the WIFEXITED macro.
+
+*Yes, it's strict but mate, don't forget in C **you have control over almost anything**, so you must code in a pretty safely way. If you can't have control over errors and unexpected behaviour, in fact, you don't have control over anything, and thats pretty bad.*
+
+
+### Linking the bits together
+
 
 ## Parsing : Transforming your command into an executable
 
@@ -177,6 +288,3 @@ From now on, it's gonna be shell's work.
 So, the command you've typed in the CLI is basically a string. 
 
 The thing is, a program doesn't executes in the way we've typed, so we need to adapt (parse) the input so we can make it as close as an executable.
-
-
-
