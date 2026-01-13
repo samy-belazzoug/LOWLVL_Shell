@@ -172,6 +172,7 @@ pid_t fork(void)
 Let's break-down this function :
 
 **What it does :**
+
 *"creates a new process by duplicating the calling process.  The new process is referred to as the child process. The calling process is referred to as the parent process."*
 
 Bacically, it creates a **child process** of the **current program**. The child process inherits the **COPY** of the parent's memory space, including variables.
@@ -227,7 +228,7 @@ Question now, can the child process operate before its parent process end ?
 
 That's a good question, because, its good (and cool) to have a child process, but if it can only executes after the parent... Its a bit limited isn't it.
 
-And, yes, we can do it with wait() function, but be careful :
+The answer for this is : **yes**, we can do it with wait() function, but be **careful** :
 
 ```c
 #include <stdio.h> //printf, puts
@@ -272,15 +273,30 @@ int main(void) {
 }
 ```
 
-When a child process terminates, it doesn't disappear, in fact, it enters in a **"zombie"** state where its process descriptor remains in the kernel until the parent acknowledge its death via 'wait()' or 'waitpid()'.
-This must happen because the child may return critical information to the parent, such as why it has terminated and its exit code.
-To do so, we must check wait() returning status. The thing is, status may vary by UNIX-like system, to safely interprets it, we must use the WIFEXITED macro.
+When a child process **terminates**, it doesn't disappear, in fact, it enters in a **"zombie" state** where its process descriptor **remains in the kernel** until the parent acknowledge its death via 'wait()' or 'waitpid()'.
+This must happen because the child **may** return **critical information** to the **parent**, such as why it has **terminated** and its **exit code**.
+To do so, we must check **wait()** returning status. The thing is, status **may vary** by UNIX-like system, to safely interprets it, we must use the **WIFEXITED** macro.
 
 *Yes, it's strict but mate, don't forget in C **you have control over almost anything**, so you must code in a pretty safely way. If you can't have control over errors and unexpected behaviour, in fact, you don't have control over anything, and thats pretty bad.*
 
-
 ### Linking the bits together
 
+So, to conclude on this kinda technical part, we'll go with a simple analogy to tell you technically why execve() **AND** fork() have to work together (for this project).
+
+Say you are a senior dev and you encounter a bug you don't want to work on. Fortunately, you have a junior dev that would be very happy to debug it.
+
+execve() replaces the current program by the *pathname. So, if in our infinite loop we call execve, it will completely stop the loop and the entire program and start *pathname.
+
+Here, you bring the junior dev to you, explains to him the problem and obviously you tell him to fix it.
+The thing is, the junior now will litterally take your place, code in your pc and you will stop working, even when the junior fix the bug, your day is finished.
+
+We can avoid that by **isolating** execve() call in a **copy** of the **current process**, which is made with fork()!
+
+To not stop your day and let your student take over your PC, you will delegate him the exact code (with github or whatever) to another PC (**fork()**) and he will try to fix it. The thing is, you have to wait until he fixed the bug, you can't do anything (**wait()**). 
+
+After fork has done its job, you have to know if child terminated without error or not and do something about it .
+
+When the junior finished his work, he has to give you back, BUT he can not give you back also, so you must checks if he managed to fix it or not (**WIFEXITED()**) and do the right actions for it like tell him what was wrong, tell him something good because he manages it or not talking, tell boss to fire the junior because he did a stack overflow?
 
 ## Parsing : Transforming your command into an executable
 
