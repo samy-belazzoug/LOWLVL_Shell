@@ -44,10 +44,12 @@ https://helloroot.medium.com/how-linux-commands-work-what-happens-when-you-run-a
 https://docstore.mik.ua/orelly/unix/upt/ch08_01.htm
 https://www.man7.org/linux/man-pages/man2/execve.2.html
 https://www.codestudy.net/blog/how-do-i-parse-command-line-arguments-in-bash/
-
+https://stackoverflow.com/questions/71333156/pathname-vs-arguments-for-execve-parameters
+man env
+man execve
+man fork
 
 Let's say you want to do **ls -a** or **dir /a**.
-
 
 There is basically 4 main steps for the shell to return what we want (in this case, the list of all the content in a directory) :
 
@@ -61,12 +63,37 @@ The CLI in reality is "just" a while loop with strings input/output. It reads yo
 
 So, as soon as you've sent the command, it's gonna be shell's work.
 
+## Execution : The business
+
+So, you're gonna tell me : Doesn't we have to parse before the execution? So why do you talk about the execution before the parsing, are you okay?
+
+Well, let me cook.
+Before talking about shell's actions, we need to know exactly 2 very important functions : execve() and fork()
+
+#### execve()
+ 
+##### int execve(const char *pathname, char *const _Nullable argv[], char *const _Nullable envp[])
+
+Let's decompose this function :
+**What it does :** 
+*"executes  the  program  referred  to  by  pathname.  This causes the program that is currently being run by the calling
+process to be replaced with a new program, with newly initialized stack, heap, and (initialized and uninitialized) data segments."*
+
+Bacically, it replaces and executes the current program being run by the program mentionned by pathname
+
+**Parameters :**
+const char *pathname : Program to execute (e.g : ls)
+char *cons_Nullable argv[] : Arguments following the program (e.g : -a, -l, -o etc..)
+char *const_Nullable envp[] : 
+
+#### fork()
+
 ## Parsing : Transforming your command into an executable
 
 From now on, it's gonna be shell's work.
 So, the command you've typed in the CLI is basically a string. 
+
 The thing is, a program doesn't executes in the way we've typed, so we need to adapt (parse) the input so we can make it as close as an executable.
 
 
 
-## Execution : The business
