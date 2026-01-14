@@ -122,12 +122,37 @@ int main() {
 
 So, as soon as you've sent the input has been stocked, it's gonna be shell's work.
 
+## Parsing : Transforming your command into an executable
+
+We saw execve() asks for multiples parameters that we'll se later, which are mainly strings or array of strings.
+
+The thing is, user's input is a simple string, and most importantly, its the whole command.
+
+So we must refactor the string so user's input are actually usable for execve !
+
+*You have a chocolate bar to give to your mate but he don't know how to eat it, if you give him the whole chocolate bar, he will not know what to do about it. So you must give him the right informations so he can eat it.*
+
+To do so, we have to parse the user's input and adapt it for execve usage.
+
+BUT, before talking about parsing, there is also two types of commands :
+
+**EXECUTABLE** : An executable file. In our context, its an official executable .It has to be found and executed, which takes some time.
+
+**BUILTIN** : A command that the shell carries out itself. it doesn't have to be parsed nor load a program (executable). It is faster than the executable, but, well, you have to implement these.
+
+For this project, we will only implement : 
+
+-**cd** : cd .. ; cd ~ ; cd ; cd somedir.
+-**exit**
+-**pwd**
+-**env**
+
+
 ## Execution : The business
+***We will focus in the case the user wants an executable. I will not detail exactly how cd, pwd, exit or env works.***
 
-I know you're gonna tell me : Doesn't we have to parse before the execution? So why do you talk about the execution before the parsing, are you okay?
 
-Well, let me tell you something.
-Before talking about any shell's actions, we need to learn about exactly 2 very important functions : execve() and fork()
+Now, we need to learn about exactly 2 very important functions : execve() and fork()
 
 #### execve()
  
@@ -302,26 +327,19 @@ To do so, we must check **wait()** returning status. The thing is, the status **
 
 So, to conclude on this kinda technical part, we'll go with another simple analogy to tell you technically why execve() **AND** fork() have to work together (for this project).
 
-Say you are a senior dev and you encounter a bug you don't want to work on. Fortunately, you have a junior dev that would be very happy to debug it.
+*Say you are a senior dev and you encounter a bug you don't want to work on. Fortunately, you have a junior dev that would be very happy to debug it.*
 
 execve() replaces the current program by the *pathname. So, if in our infinite loop we call execve, it will completely stop the loop and the entire program and start *pathname.
 
-Here, you bring the junior dev to you, explains to him the problem and obviously you tell him to fix it.
-The thing is, the junior now will litterally take your place, code in your pc and you will stop working, even when the junior fix the bug, your day is finished.
+*Here, you bring the junior dev to you, explains to him the problem and obviously you tell him to fix it.
+The thing is, the junior now will litterally take your place, code in your pc and you will stop working, even when the junior fix the bug, your day is finished.*
 
 We can avoid that by **isolating** execve() call in a **copy** of the **current process**, which is made with fork()!
 
-To not stop your day and let your student take over your PC, you will delegate him the exact code (with github or whatever) to another PC (**fork()**) and he will try to fix it. The thing is, you have to wait until he fixed the bug, you can't do anything (**wait()**). 
+*To not stop your day and let your student take over your PC, you will delegate him the exact code (with github or whatever) to another PC (**fork()**) and he will try to fix it. The thing is, you have to wait until he fixed the bug, you can't do anything (**wait()**).*
 
 After fork has done its job, you have to know if child terminated without error or not and do something about it .
 
-When the junior has finished his work, he must return it to you, **BUT** he also cannot not return it to you at all so you must check if he managed to fix it or not (**WIFEXITED()**) and do the right actions for that like telling him what was wrong, tell him something good because he manages to do it or not talk, tell the boss to fire the junior because he made a pile overflow?
+*When the junior finish his work, he must return it to you, **BUT** he also cannot not return it to you at all so you must check if he managed to fix it or not (**WIFEXITED()**) and do the right actions for that like telling him what was wrong, tell him something good because he manages to do it or not talk, tell the boss to fire the junior because he made a stack overflow?*
 
-## Parsing : Transforming your command into an executable
-
-Let's now test
-
-From now on, it's gonna be shell's work.
-So, the command you've typed in the CLI is basically a string. 
-
-The thing is, a program doesn't executes in the way we've typed, so we need to adapt (parse) the input so we can make it as close as an executable.
+ 
