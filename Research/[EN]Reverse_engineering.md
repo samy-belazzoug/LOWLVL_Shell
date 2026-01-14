@@ -1,6 +1,6 @@
 # HOW CAN WE MAKE A SHELL ?!
 
-*fork() + execve() is all you need*
+*fork() + execve() (and a chocolate bar) is all you need*
 
 This document will **reverse engineering** UNIX's shell in a very simple way for understanding purpose.
 
@@ -15,7 +15,7 @@ I think its important to know the differences between a Shell, Terminal and CLI 
 
 ### What is a Terminal ?
 
-A terminal is a text input/output environment window emulating a console in a graphical user interface. To make it simple, the terminal is the environment where the user can access to consoles. It's the emulating section.
+A terminal is a text input/output environment window emulating a console in a graphical user interface. The terminal is the environment where the user can access to consoles. It's the emulating section.
 
 E.G : GNOME Terminal, Termux, Alacritty, Windows Terminal.
 
@@ -28,14 +28,14 @@ E.G : Docker, AWS CLI, PowerShell
 
 ### What is a Shell ?
 
-The Shell is a **program** that acts as an intermediary between the user and the kernel. Basically, it **interprets** commands and **communicates** with the kernel to execute user's commands. It's the interpreting and executing section.
+The Shell is a **program** that acts as an intermediary between the user and the kernel. It **interprets** commands and **communicates** with the kernel to execute user's commands. It's the interpreting and executing section.
 Please note that we do not see the shell at all in the CLI!
 
 ***AND NOTE THAT THIS IS WHAT WE HAVE TO DEVELOP***
 
 E.G : bash, zsh, fish, this project!
 
-## BASICALLY
+## Conclusion
 
 When you open a *TERMINAL*, it **emulates** *COMMAND LINE INTERFACES*, where you can **interact** with the computer (kernel/software etc..) with **text-based commands**. The *SHELL*, IN THE BACKGROUND, **interprets, executes** the commands you've typed in the CLI. 
 
@@ -66,11 +66,11 @@ man wait
 man perror
 man fgets()
 
-#### Warning : Please focus on this part, its gonna be pretty technical.
+#### Warning : Please focus on this part, its gonna be technical.
 
 Let's say you want to do **ls -a**.
 
-There is basically 3 main steps for the shell to return what we want (in this case, the list of all the content in a directory) :
+There are 3 main steps for the shell to return what we want (in this case, the list of all the content in a directory) :
 
 -Getting user input
 -Parsing
@@ -80,16 +80,19 @@ There is basically 3 main steps for the shell to return what we want (in this ca
 
 When you enter the command line interface (bash) it invites you to type a command.
 
-What I mean by that is that the CLI doesn't perform any operation when it launches, it waits for your demand.
+*The CLI doesn't perform any operation when it launches, it waits for your demand*.
 
-The CLI in reality is "just" a **while loop** with strings as **input/output**. It reads your input, send it to the shell and returns what the shell did with your input.
+The CLI is "just" a **while loop** with strings as **input/output**. It reads your input, send it to the shell and returns what the shell did with your input.
 
-As for the input, we will use a buffer of **4096** caracters (char s[4096]). We are forced to have a **finite** size because of fgets() that we'll see just after..
+For the input, we will stock it using a buffer of size **4096** (char s[4096]). We are forced to have a **finite** size because of fgets() that we'll see just after..
 
-***Linux kernel terminal input buffer*** (N_TTY_BUF_SIZE) is defined as **4096**.
-So we're following that limit, its a safe and efficient method.
+Why 4096 and not another number ?
+***Linux kernel terminal input buffer*** (N_TTY_BUF_SIZE) size is defined as **4096**.
+So we're following that limit, it's a safe and efficient method.
 
-We can read inputs with fgets. However fgets asks for multilple stuff : 
+Our buffer is empty by default, this is normal because we want to wait for the user's input and stock it.
+
+We can read user's inputs with fgets. However fgets asks for multilple stuff : 
 -**const** __*char__ **_restrict_ _s** : The string
 -**int __n** : How many bytes we want to read, In our case, the size of the buffer **4096**
 -**FILE** *____restrict__ **__stream** : From which file, in our case, the standard input **stdio** (yes, standard input is a file like everything).
@@ -117,7 +120,7 @@ int main() {
 }
 ```
 
-So, as soon as you've sent the command, it's gonna be shell's work.
+So, as soon as you've sent the input has been stocked, it's gonna be shell's work.
 
 ## Execution : The business
 
@@ -139,7 +142,9 @@ Let's break-down this function :
 *"executes  the  program  referred  to  by  pathname.  This causes the program that is currently being run by the calling
 process to be replaced with a new program, with newly initialized stack, heap, and (initialized and uninitialized) data segments."*
 
-Bacically, it replaces and executes the current program being run by the program mentionned by pathname
+Basically, it replaces and executes the current program being run by the program mentionned by pathname
+
+*Let's say you are with your mate in a park and you have a chocolate bar. As your eating it, you ask your friend if he want a bit, he is hungry so he said yes, the thing is, now you gave him all the rest of your chocolate bar and there’s nothing you can do anymore!*
 
 **Parameters :**
 -__const char *pathname__ : Program to execute (e.g : ls)
@@ -147,8 +152,8 @@ Bacically, it replaces and executes the current program being run by the program
 -__char *cons_Nullable argv[]__ : Arguments following the program (e.g : -a, -l, -o etc..)
 
 -__char *const_Nullable envp[]__ : String array of environment variables (execve will 
-try to find pathname in all the environment variables in envp[])
-*Generally speaking, you'll pass **__environ** as envp[] parameter as its simpler and faster. __environ contains every environment variables of the shell.*
+try to find *pathname in all the environment variables in envp[])
+*Generally speaking, you'll pass **__environ** (or environ) as envp[] parameter as its simpler and faster. __environ contains every environment variables of the shell.*
 
 Example of use of execve : 
 ```c
@@ -175,9 +180,11 @@ Let's break-down this function :
 
 *"creates a new process by duplicating the calling process.  The new process is referred to as the child process. The calling process is referred to as the parent process."*
 
-Bacically, it creates a **child process** of the **current program**. The child process inherits the **COPY** of the parent's memory space, including variables.
+Simply said, it creates a **child process** of the **current program**. The child process inherits the **COPY** of the parent's memory space, including variables.
 
-**HOWEVER, BE CAREFUL !!** The child parent have only a **COPY** of its parent, it **cannot modify the content of its parent** (the inheritance just copies, it doesn't create a shared memory space!).
+**HOWEVER, BE CAREFUL !!** The child parent have only a **COPY** of its parent, it **cannot modify the content of its parent** (the inheritance just copy content, it doesn't create a shared memory space!).
+
+*Think of it in this way : You give a chocolate bar to your mate, you give him the same one, but he can't eat or touch yours, he only have access to his.*
 
 **Parameters :** 
 void : no parameters needed.
@@ -216,11 +223,17 @@ So, fork **returns* a **pid_t** value (which is a kind of int), we need to stock
 
 If fork() **returns -1** -> the child process creation has **failed**, you do not have your child process.
 
+*Your mate don't want the chocolate*
+
 if fork() **returns 0** -> The child is **created**, we can operate on it.
+
+*Your mate want the chocolate*
 
 if you launch this code, you'll notice two things :
 -child's program is actually in **case 0**.
 -child process will operate **after parent** program has finished.
+
+*Your mate can eat his chocolate bar only after you finished*
 
 #### Child processes
 
@@ -272,16 +285,22 @@ int main(void) {
     exit(EXIT_SUCCESS);
 }
 ```
+First of all, the parent process will be forced to wait until the child process has finished his tasks
+
+*You can't eat your chocolate bar until your mate finished his.
 
 When a child process **terminates**, it doesn't disappear, in fact, it enters in a **"zombie" state** where its process descriptor **remains in the kernel** until the parent acknowledge its death via 'wait()' or 'waitpid()'.
 This must happen because the child **may** return **critical information** to the **parent**, such as why it has **terminated** and its **exit code**.
-To do so, we must check **wait()** returning status. The thing is, status **may vary** by UNIX-like system, to safely interprets it, we must use the **WIFEXITED** macro.
+
+*After your mate finished his chocolate bar, you have to know ***HOW*** he finished it (has he ate it properly? Did he choked?), ***IF*** he finished it (did he throw it ? Did he loved it ?)if he disappears, you can't know that!*
+
+To do so, we must check **wait()** returning status. The thing is, the status **may vary** by UNIX-like system, to safely interprets it, we must use the **WIFEXITED** macro.
 
 *Yes, it's strict but mate, don't forget in C **you have control over almost anything**, so you must code in a pretty safely way. If you can't have control over errors and unexpected behaviour, in fact, you don't have control over anything, and thats pretty bad.*
 
 ### Linking the bits together
 
-So, to conclude on this kinda technical part, we'll go with a simple analogy to tell you technically why execve() **AND** fork() have to work together (for this project).
+So, to conclude on this kinda technical part, we'll go with another simple analogy to tell you technically why execve() **AND** fork() have to work together (for this project).
 
 Say you are a senior dev and you encounter a bug you don't want to work on. Fortunately, you have a junior dev that would be very happy to debug it.
 
@@ -296,9 +315,11 @@ To not stop your day and let your student take over your PC, you will delegate h
 
 After fork has done its job, you have to know if child terminated without error or not and do something about it .
 
-When the junior finished his work, he has to give you back, BUT he can not give you back also, so you must checks if he managed to fix it or not (**WIFEXITED()**) and do the right actions for it like tell him what was wrong, tell him something good because he manages it or not talking, tell boss to fire the junior because he did a stack overflow?
+When the junior has finished his work, he must return it to you, **BUT** he also cannot not return it to you at all so you must check if he managed to fix it or not (**WIFEXITED()**) and do the right actions for that like telling him what was wrong, tell him something good because he manages to do it or not talk, tell the boss to fire the junior because he made a pile overflow?
 
 ## Parsing : Transforming your command into an executable
+
+Let's now test
 
 From now on, it's gonna be shell's work.
 So, the command you've typed in the CLI is basically a string. 
