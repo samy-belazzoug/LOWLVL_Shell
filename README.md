@@ -1,83 +1,64 @@
 # LOWLVL_Shell
 
-A lightweight, feature-rich shell implementation written in C from scratch.
+A complete shell implementation written in C with pipes, redirection, and job control.
 
 ## Quick Start
 
 ```bash
-make              # Build the shell
-./bashr           # Run it
+bash build.sh   # Build
+./bashr         # Run
+pwd             # Try: pwd
+exit            # Quit
 ```
 
-## Features ✨
+## Features
 
-- **Interactive REPL** - Full read-eval-print loop with custom prompt
-- **Built-in Commands** - cd, pwd, exit, echo, env, export, jobs
-- **Pipes** - Chain commands with `|`
-- **Redirection** - Input `<`, output `>`, append `>>`
-- **Background Execution** - Run commands with `&`
-- **Job Control** - Track background processes
-- **Signal Handling** - Ctrl+C and zombie process cleanup
-- **PATH Resolution** - Automatically find commands in $PATH
-- **Error Handling** - Proper error messages and recovery
-
-## Documentation
-
-- **[FEATURES.md](FEATURES.md)** - Usage guide with examples
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Code design and structure
-- **[RESEARCH/](Research/)** - Low-level Unix concepts reference
-
-## Project Structure
-
-```
-src/
-├── bashr.c       - Main shell loop
-├── bashr.h       - Declarations & data structures
-├── executor.c    - Command execution, pipes, redirects
-├── builtins.c    - Built-in commands
-└── utils.c       - Parser, tokenizer, utilities
-```
-
-## Build
-
-```bash
-make           # Compile
-make clean     # Remove artifacts
-make test      # Run tests
-make help      # Show targets
-```
+- ✅ Interactive REPL with prompt
+- ✅ 7 built-in commands (cd, pwd, exit, echo, env, export, jobs)
+- ✅ Pipes (|) and I/O redirection (>, >>, <)
+- ✅ Background execution (&)
+- ✅ Job control & signal handling
+- ✅ 589 lines of clean C code
 
 ## Usage Examples
 
 ```bash
-bashr:/$ ls | grep .c          # Pipes
-bashr:/$ echo "test" > out.txt # Redirection
-bashr:/$ cd /tmp               # Built-ins
-bashr:/$ sleep 100 &           # Background jobs
+bashr:/$ pwd                   # Built-in
+bashr:/$ ls | grep .md         # Pipes
+bashr:/$ echo test > file.txt  # Redirection
+bashr:/$ sleep 10 &            # Background
 bashr:/$ jobs                  # List jobs
 bashr:/$ exit                  # Quit
 ```
 
-## Learning Resources
+## Files
 
-This project demonstrates:
-- Process creation (`fork`, `execve`)
-- Inter-process communication (pipes)
-- File descriptor manipulation (`dup2`)
-- Signal handling (`signal`)
-- Dynamic memory management
-- Systems programming in C
+```
+src/
+├── bashr.c       - Main REPL loop
+├── bashr.h       - Declarations
+├── executor.c    - Execution engine
+├── builtins.c    - Built-in commands
+└── utils.c       - Parser & utilities
+```
 
-## Limitations & Future Work
+## Documentation
 
-Current limitations:
-- No variable expansion (`$VAR`)
-- No filename globbing (`*.txt`)
-- No command history
-- No error stream redirection (`2>`)
+- **GUIDE.md** - Architecture, code walkthrough, how to extend
+- **REFERENCE.md** - Visual diagrams, troubleshooting
+- **PROJECT.md** - Summary, checklist, statistics
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for enhancement ideas.
+## Build
+
+```bash
+bash build.sh    # Build (Linux/WSL/Mac)
+./bashr          # Run
+```
+
+## Learning
+
+This teaches: fork, execve, pipes, signals, memory safety, modular design.
 
 ---
 
-**[SCHOOL PROJECT]** - Educational shell implementation for learning low-level Unix concepts.
+**[SCHOOL PROJECT]** - Educational shell implementation.
