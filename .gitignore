@@ -1,0 +1,22 @@
+# Build artifacts
+*.o
+*.a
+*.so
+bashr
+bashr.exe
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test files
+*.txt
+test_output/
+
+# Temporary files
+*.tmp
+*.bak

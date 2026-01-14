@@ -1,64 +1,63 @@
 # LOWLVL_Shell
 
-A complete shell implementation written in C with pipes, redirection, and job control.
-
-## Quick Start
-
-```bash
-bash build.sh   # Build
-./bashr         # Run
-pwd             # Try: pwd
-exit            # Quit
-```
+A complete shell implementation in C with pipes, redirection, and job control.
 
 ## Features
 
-- ✅ Interactive REPL with prompt
-- ✅ 7 built-in commands (cd, pwd, exit, echo, env, export, jobs)
-- ✅ Pipes (|) and I/O redirection (>, >>, <)
-- ✅ Background execution (&)
-- ✅ Job control & signal handling
-- ✅ 589 lines of clean C code
-
-## Usage Examples
-
-```bash
-bashr:/$ pwd                   # Built-in
-bashr:/$ ls | grep .md         # Pipes
-bashr:/$ echo test > file.txt  # Redirection
-bashr:/$ sleep 10 &            # Background
-bashr:/$ jobs                  # List jobs
-bashr:/$ exit                  # Quit
-```
-
-## Files
-
-```
-src/
-├── bashr.c       - Main REPL loop
-├── bashr.h       - Declarations
-├── executor.c    - Execution engine
-├── builtins.c    - Built-in commands
-└── utils.c       - Parser & utilities
-```
-
-## Documentation
-
-- **GUIDE.md** - Architecture, code walkthrough, how to extend
-- **REFERENCE.md** - Visual diagrams, troubleshooting
-- **PROJECT.md** - Summary, checklist, statistics
+- Interactive REPL with custom prompt
+- 7 built-in commands: cd, pwd, exit, echo, env, export, jobs
+- Pipes (|) and I/O redirection (>, >>, <)
+- Background execution (&) with job control
+- Signal handling (Ctrl+C, zombie cleanup)
+- 589 lines of production-quality C code
 
 ## Build
 
 ```bash
-bash build.sh    # Build (Linux/WSL/Mac)
-./bashr          # Run
+bash build.sh
 ```
 
-## Learning
+## Run
 
-This teaches: fork, execve, pipes, signals, memory safety, modular design.
+```bash
+./bashr
+```
 
----
+## Usage
 
-**[SCHOOL PROJECT]** - Educational shell implementation.
+```bash
+bashr:/$ pwd                    # Built-in command
+bashr:/$ ls | grep .md         # Pipes
+bashr:/$ echo test > file.txt  # Redirection
+bashr:/$ sleep 10 &            # Background job
+bashr:/$ jobs                  # List jobs
+bashr:/$ exit                  # Quit
+```
+
+## Project Structure
+
+```
+src/
+├── bashr.c       Main REPL loop
+├── bashr.h       Declarations
+├── executor.c    Command execution
+├── builtins.c    Built-in commands
+└── utils.c       Parser & utilities
+```
+
+## Requirements Met
+
+✅ REPL loop with fgets()
+✅ fork() + execve() integration
+✅ wait() + zombie cleanup
+✅ Command parsing
+✅ Built-in commands
+✅ Error handling
+✅ Signal handling
+✅ Pipes & redirection
+✅ Job control
+
+## Documentation
+
+See `Research/Nanoshell.pdf` for project specifications.
+
