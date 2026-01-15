@@ -2,7 +2,7 @@
 
 int builtin_cd(char **args) {
     if (!args || !args[0]) {
-        fprintf(stderr, "cd: missing argument\n");
+        printf("cd: missing argument\n");
         return 1;
     }
     
@@ -27,7 +27,13 @@ int builtin_pwd(char **args) {
 int builtin_exit(char **args) {
     int code = 0;
     if (args && args[1]) {
-        code = atoi(args[1]);
+        // Manual string to int conversion
+        code = 0;
+        for (int i = 0; args[1][i]; i++) {
+            if (args[1][i] >= '0' && args[1][i] <= '9') {
+                code = code * 10 + (args[1][i] - '0');
+            }
+        }
     }
     exit(code);
     return 0;
@@ -58,14 +64,14 @@ int builtin_env(char **args) {
 
 int builtin_export(char **args) {
     if (!args || !args[1]) {
-        fprintf(stderr, "export: missing argument\n");
+        printf("export: missing argument\n");
         return 1;
     }
     
     char *var = args[1];
     char *eq = strchr(var, '=');
     if (!eq) {
-        fprintf(stderr, "export: invalid format (use VAR=value)\n");
+        printf("export: invalid format (use VAR=value)\n");
         return 1;
     }
     

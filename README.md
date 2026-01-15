@@ -2,6 +2,11 @@
 
 A complete shell implementation in C with pipes, redirection, and job control.
 
+## Compliance
+
+This project uses **ONLY allowed functions** as per assignment constraints.
+See [COMPLIANCE.md](COMPLIANCE.md) for detailed function list.
+
 ## Features
 
 - Interactive REPL with custom prompt
