@@ -1,22 +1,11 @@
-#include "my_parsing.h"
-
-int main() {
-    char *str = "Hello wo  rl  d";
-    printf("%d\n",word_counter(str));
-    char **strs = parsing(str);
-    if (strs[word_counter(str)] == NULL) {
-        printf("You're right mate! spot on!`\n");
-    }
-    length(str);
-    exit(EXIT_SUCCESS);
-}
+#include "../header/my_parsing.h"
 
 int length(char *str) { //Returns the length of a string
     int length = 0;
     for (int i = 0; str[i] != '\0'; i++) { //Note that we will stop to to last index, not the end of the string
         length += 1;
     }
-    printf("length = %d\n",length);
+    //printf("length = %d\n",length);
     return length + 1;
 }
 
@@ -42,7 +31,7 @@ int word_counter(char *str) { // Count how many words there is in a string
         last_index = i;
     }
     length = last_index + 1; //Length stopped at the last caracter, not the entire string!
-    printf("LENGTH = %d\n",length);
+    //printf("LENGTH = %d\n",length);
     if (space_counter == length) { //Get a reliable result
         word_count = 0;
     }
@@ -97,7 +86,7 @@ char **parsing(char *str) {
     
     // Debug
     for (int m = 0; m <= argv_iterat; m++) {
-        printf("argv[%d] = %s\n", m, argv[m]);
+        //printf("argv[%d] = %s\n", m, argv[m]);
     }
     
     return argv;

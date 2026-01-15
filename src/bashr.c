@@ -1,10 +1,63 @@
-#include "bashr.h"
+#include "header/bashr.h"
+#include "header/my_parsing.h"
 
 int main() {   
     while (1) {
-        char s[N_TTY_BUF_SIZE];
-        printf("Input : ");
-        fgets(s,sizeof(s),stdin); //
-        printf("Output : %s\n",s);
+        // ACT 1, GET THE INPUTS
+        char cmd[N_TTY_BUF_SIZE]; //Reminder : 4096 size buffer
+        printf("Input : "); 
+        fgets(cmd,sizeof(cmd),stdin); //Always leave /n at the end of the word, we need to remove it!
+        
+        // ACT 2, CLEAN THE INPUTS
+        size_t len = strlen(cmd);
+            if (len > 0 && cmd[len - 1] == '\n') {
+            cmd[len - 1] = '\0';
+        }
+
+        // ACT 3, PARSE THE INPUTS
+        char **argv = parsing(cmd);
+
+        for (int i = 0; argv[i] != NULL;i++) {
+            printf("%s\n",argv[i]);
+        }
+
+        // ACT 4, BUILTINS
+        
+        // exit
+        if (strcmp(argv[0],"exit") == 0) { 
+            puts("You exited the program");
+            exit(EXIT_SUCCESS);
+        }
+    
+        // env
+        else if (strcmp(argv[0],"env") == 0) { 
+            for (int i = 0; __environ[i] != NULL; i++) {
+                printf("%s\n",__environ[i]);
+            }
+        }
+
+        // cd
+        else if (strcmp(argv[0],"cd") == 0) { 
+            char *path;
+            // cd ~ AND cd
+            if (strcmp(argv[1],"~") || argv[1] == NULL) {
+                path = getenv("HOME");
+                if (chdir(path) != 0) {
+                    printf("Couldn't find path : %s\n",path);
+                }
+            }
+            // cd ..
+            else if (strcmp(argv[1], "..") == 0) {
+                
+            }
+
+        }
     }
+        
+        // ACT 5, EXECUTABLES
+    exit(EXIT_SUCCESS);   
 }
+        
+        
+
+     
