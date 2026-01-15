@@ -1,7 +1,10 @@
-#include <libsync.h>
+#include "bashr.h"
 
 int main() {   
-    char *args[] = {"/bin/ls","-a",NULL};
-    execve(args[0],args,__environ);
-    return 0;
+    while (1) {
+        char s[N_TTY_BUF_SIZE];
+        printf("Input : ");
+        fgets(s,sizeof(s),stdin); //
+        printf("Output : %s\n",s);
+    }
 }

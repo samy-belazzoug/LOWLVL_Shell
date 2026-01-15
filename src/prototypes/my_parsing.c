@@ -1,27 +1,26 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-void length(char *str);
-
-char **parsing(char *str);
+#include "my_parsing.h"
 
 int main() {
-    length("ls");
-    length("   ls");                   
-    length("ls   ");                 
-    length("   ls   ");              
-    length("   ls   -a   ");         
-    length("               ");       
-
-    /*Warning, in the case of :
-    "              ls   "
-    "ls               "
-    There should be one word, however, it returns 3 for the first case
-    and 2 for the second. */
+    char *str = "Hello wo  rl  d";
+    printf("%d\n",word_counter(str));
+    char **strs = parsing(str);
+    if (strs[word_counter(str)] == NULL) {
+        printf("You're right mate! spot on!`\n");
+    }
+    length(str);
     exit(EXIT_SUCCESS);
 }
 
-void length(char *str) {
+int length(char *str) { //Returns the length of a string
+    int length = 0;
+    for (int i = 0; str[i] != '\0'; i++) { //Note that we will stop to to last index, not the end of the string
+        length += 1;
+    }
+    printf("length = %d\n",length);
+    return length + 1;
+}
+
+int word_counter(char *str) { // Count how many words there is in a string
     // Phase 1 : Count the words
     int start = 0, last_index = 0,  word_count = 0, space_counter = 0, length;
     
@@ -36,20 +35,15 @@ void length(char *str) {
             }
             //The next caracter isn't a space
             else if (i > start) { //If i > start, it means there is a word. If str[start] == 32, it means there was multiples spaces before the caracter!
-                for (int j = start; j < i; j++) {
-                    printf("%c",str[j]);
-                }
                 word_count += 1;
                 start = i + 1;
             }
         }
         last_index = i;
-        //printf("%d ",i);
     }
     length = last_index + 1; //Length stopped at the last caracter, not the entire string!
-    //printf("\nLast element %d\nSpace counter : %d\n",str[length + 1],space_counter);
-    
-    if (space_counter == length) { //Get a reliable result (idk why length is always +1 ahead of space_counter)
+    printf("LENGTH = %d\n",length);
+    if (space_counter == length) { //Get a reliable result
         word_count = 0;
     }
 
@@ -57,31 +51,54 @@ void length(char *str) {
         word_count += 1;
     }
     //Now we must check for the last caracter
-    printf("\nSTRING : %s\nWORDS : %d\nLENGTH = %d\nSPACE COUNTER = %d\n\n",str,word_count,length,space_counter);
+    //printf("\nSTRING : %s\nWORDS : %d\nLENGTH = %d\nSPACE COUNTER = %d\n\n",str,word_count,length,space_counter);
+    return word_count;
 }
 
 char **parsing(char *str) {
-    // Phase 1 : count the words
-    int length = 0;
-    int actual = 0;
-    int word_count = 0;
-    while (str[length] != '\0') {
-        if (str[length] == ' ') {
-            if (length - actual == 0) { // If its still a SPACE
-                actual = length;
-            }
-            else {
-                actual = length;
-                word_count += 1;
+    int words = word_counter(str);
+    char **argv = malloc((words + 1) * sizeof(char *)); // +1 pour NULL
+    
+    int start = 0, argv_iterat = 0, len = length(str);
+
+    while (str[start] == 32) start++; // Skip les premiers espaces
+
+    for (int i = start; str[i] != '\0'; i++) {
+        if (str[i] == 32 && i > start) { // On a trouvé un espace après un mot
+            if (str[i + 1] != 32 && str[i + 1] != '\0') { // Le prochain n'est pas un espace
+                int word_len = i - start;
+                argv[argv_iterat] = malloc((word_len + 1) * sizeof(char));
+                
+                // Copie byte par byte
+                for (int l = 0; l < word_len; l++) {
+                    argv[argv_iterat][l] = str[start + l];
+                }
+                argv[argv_iterat][word_len] = '\0';
+                
+                argv_iterat++;
+                start = i + 1;
             }
         }
-        length += 1;
     }
-
-    char **argv;
     
-
-
-
+    // Dernier mot (si la chaîne ne se termine pas par un espace)
+    if (len > start && str[start] != 32) {
+        int word_len = len - start;
+        argv[argv_iterat] = malloc((word_len + 1) * sizeof(char));
+        
+        for (int l = 0; l < word_len; l++) {
+            argv[argv_iterat][l] = str[start + l];
+        }
+        argv[argv_iterat][word_len] = '\0';
+        argv_iterat++;
+    }
+    
+    argv[argv_iterat] = NULL; // Termine avec NULL pour execve
+    
+    // Debug
+    for (int m = 0; m <= argv_iterat; m++) {
+        printf("argv[%d] = %s\n", m, argv[m]);
+    }
+    
     return argv;
 }
