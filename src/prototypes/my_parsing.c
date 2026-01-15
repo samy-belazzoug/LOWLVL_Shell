@@ -42,7 +42,6 @@ void length(char *str) {
                 word_count += 1;
                 start = i + 1;
             }
-            
         }
         last_index = i;
         //printf("%d ",i);
