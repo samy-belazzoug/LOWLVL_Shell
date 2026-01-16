@@ -1,4 +1,4 @@
-#include "../header/my_parsing.h"
+#include "../header/nanoshell.h"
 
 int length(char *str) { //Returns the length of a string
     int length = 0;

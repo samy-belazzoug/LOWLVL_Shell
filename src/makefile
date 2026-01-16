@@ -1,8 +1,8 @@
 # Variables de configuration
 CC = gcc
 CFLAGS = -Wall -Wextra -Iheader
-TARGET = exe/bashr
-SRC = bashr.c imp/my_parsing.c
+TARGET = exe/nanoshell
+SRC = nanoshell.c imp/ns_imp.c
 OBJ = $(SRC:.c=.o)
 
 # Règle par défaut
@@ -12,21 +12,22 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	@mkdir -p exe
 	$(CC) $(CFLAGS) -o $@ $^
-	@echo "✓ Compilation réussie : $(TARGET)"
+	@echo "Compilation sucess : $(TARGET)"
 
 # Compilation des fichiers objets
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Nettoyage des fichiers objets
+
+# Object file cleaning
 clean:
 	rm -f $(OBJ)
-	@echo "✓ Fichiers objets supprimés"
+	@echo "Object files cleaned"
 
 # Nettoyage complet
 fclean: clean
 	rm -f $(TARGET)
-	@echo "✓ Nettoyage complet"
+	@echo "Complete cleaned done."
 
 # Recompilation complète
 re: fclean all

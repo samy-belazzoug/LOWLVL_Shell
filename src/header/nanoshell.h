@@ -10,4 +10,10 @@
 #include <sys/wait.h> //You can read it
 #include <string.h> //strcmp
 
+int length(char *str); //returns the length of a string
+
+int word_counter(char *str); // Count how many words there is in a string
+
+char **parsing(char *str); //Return a list of str's words (specifically formatted to work for execve)
+
 #endif
