@@ -1,68 +1,74 @@
-# LOWLVL_Shell
+# LOWLVL Shell
 
-A complete shell implementation in C with pipes, redirection, and job control.
-
-## Compliance
-
-This project uses **ONLY allowed functions** as per assignment constraints.
-See [COMPLIANCE.md](COMPLIANCE.md) for detailed function list.
+A complete shell implementation in C (single file, 460 lines).
 
 ## Features
 
-- Interactive REPL with custom prompt
+- Interactive REPL with prompt
 - 7 built-in commands: cd, pwd, exit, echo, env, export, jobs
-- Pipes (|) and I/O redirection (>, >>, <)
-- Background execution (&) with job control
-- Signal handling (Ctrl+C, zombie cleanup)
-- 589 lines of production-quality C code
+- Pipes (|), I/O redirection (>, >>, <), background execution (&)
+- Job control, signal handling, PATH resolution
 
 ## Build
 
 ```bash
-bash build.sh
+make              # or: gcc -Wall -Wextra -std=c99 -o bashr bashr.c
+make clean        # remove artifacts
+make rebuild      # clean + build
 ```
 
 ## Run
 
 ```bash
 ./bashr
+bashr:~$ pwd
+/path/to/shell
+bashr:~$ ls | grep bashr
+bashr bashr.c
+bashr:~$ exit
 ```
 
-## Usage
+## Files
+
+- **bashr.c** - Single source file (460 lines, all-in-one)
+- **Makefile** - Build system
+- **README.md** - This file
+- **.gitignore** - Git ignore rules
+
+## Compliance
+
+Uses only allowed functions:
+- I/O: printf, fgets
+- Memory: malloc, free
+- Process: fork, execve, waitpid, exit
+- Environment: getenv, perror
+- Directory: getcwd, chdir, access
+- String: strlen, strcmp, strcpy, strncpy, strchr, strtok
+
+## Built-in Commands
+
+| Command | Function |
+|---------|----------|
+| cd [dir] | Change directory |
+| pwd | Print working directory |
+| echo [text] | Print text |
+| env | List environment variables |
+| export VAR=val | Set environment variable |
+| jobs | List background jobs |
+| exit [code] | Exit shell |
+
+## Examples
 
 ```bash
-bashr:/$ pwd                    # Built-in command
-bashr:/$ ls | grep .md         # Pipes
-bashr:/$ echo test > file.txt  # Redirection
-bashr:/$ sleep 10 &            # Background job
-bashr:/$ jobs                  # List jobs
-bashr:/$ exit                  # Quit
+# Pipes
+bashr:~$ ls -la | grep .c
+
+# Redirection  
+bashr:~$ echo "hello" > file.txt
+bashr:~$ cat < file.txt
+
+# Background jobs
+bashr:~$ sleep 100 &
+bashr:~$ jobs
 ```
-
-## Project Structure
-
-```
-src/
-├── bashr.c       Main REPL loop
-├── bashr.h       Declarations
-├── executor.c    Command execution
-├── builtins.c    Built-in commands
-└── utils.c       Parser & utilities
-```
-
-## Requirements Met
-
-✅ REPL loop with fgets()
-✅ fork() + execve() integration
-✅ wait() + zombie cleanup
-✅ Command parsing
-✅ Built-in commands
-✅ Error handling
-✅ Signal handling
-✅ Pipes & redirection
-✅ Job control
-
-## Documentation
-
-See `Research/Nanoshell.pdf` for project specifications.
 
