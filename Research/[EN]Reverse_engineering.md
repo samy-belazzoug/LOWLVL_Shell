@@ -12,7 +12,6 @@ https://en.wikipedia.org/wiki/List_of_terminal_emulators
 
 I think its important to know the differences between a Shell, Terminal and CLI to exactly know what we have to develop, the limits and the most important features. Personally, I'll discover with you.
 
-
 ### What is a Terminal ?
 
 A terminal is a text input/output environment window emulating a console in a graphical user interface. The terminal is the environment where the user can access to consoles. It's the emulating section.
@@ -65,6 +64,7 @@ man fork
 man wait
 man perror
 man fgets()
+man ascii
 
 #### Warning : Please focus on this part, its gonna be technical.
 
