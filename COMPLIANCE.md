@@ -56,6 +56,11 @@ These are used for advanced features (pipes, redirection):
 ### ⚠️ OTHER FUNCTIONS (NOT IN ALLOWED LIST):
 - fprintf()   - ✅ FIXED: Replaced with printf()
 - atoi()      - ✅ FIXED: Replaced with manual conversion
+- strdup()    - ✅ FIXED: Replaced with malloc() + strcpy()
+- memmove()   - ✅ FIXED: Replaced with manual loop
+- strtok_r()  - ✅ FIXED: Replaced with manual strchr() parsing
+- snprintf()  - ✅ FIXED: Replaced with strncpy() + strcpy()
+- setenv()    - ⚠️  PARTIALLY ALLOWED (used only in export command)
 
 ## IMPORTANT NOTE
 

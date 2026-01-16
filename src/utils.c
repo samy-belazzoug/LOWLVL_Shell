@@ -8,8 +8,13 @@ void trim_whitespace(char *str) {
     int i = 0, j = strlen(str) - 1;
     while (i <= j && (str[i] == ' ' || str[i] == '\t')) i++;
     while (j >= i && (str[j] == ' ' || str[j] == '\t')) j--;
-    memmove(str, str + i, j - i + 1);
-    str[j - i + 1] = '\0';
+    
+    // Copy trimmed portion using strcpy logic
+    int len = j - i + 1;
+    for (int k = 0; k < len; k++) {
+        str[k] = str[i + k];
+    }
+    str[len] = '\0';
 }
 
 int contains_char(const char *str, char c) {
@@ -20,7 +25,10 @@ int contains_char(const char *str, char c) {
 char** tokenize(char *input, const char *delim) {
     if (!input || !delim) return NULL;
     
-    char *copy = strdup(input);
+    // Allocate and copy input
+    char *copy = malloc(strlen(input) + 1);
+    strcpy(copy, input);
+    
     char **tokens = malloc(MAX_ARGS * sizeof(char*));
     int count = 0;
     
@@ -28,7 +36,10 @@ char** tokenize(char *input, const char *delim) {
     while (token && count < MAX_ARGS - 1) {
         trim_whitespace(token);
         if (strlen(token) > 0) {
-            tokens[count++] = strdup(token);
+            // Allocate and copy token
+            tokens[count] = malloc(strlen(token) + 1);
+            strcpy(tokens[count], token);
+            count++;
         }
         token = strtok(NULL, delim);
     }
@@ -49,7 +60,10 @@ Command* parse_command(char *input) {
     if (!input) return NULL;
     
     Command *cmd = malloc(sizeof(Command));
-    char *copy = strdup(input);
+    
+    // Copy input instead of strdup
+    char *copy = malloc(strlen(input) + 1);
+    strcpy(copy, input);
     trim_whitespace(copy);
     
     char **tokens = tokenize(copy, " \t");
@@ -76,9 +90,13 @@ void free_command(Command *cmd) {
 
 char* find_in_path(const char *cmd) {
     if (!cmd) return NULL;
+    
+    // If path contains '/', check if executable
     if (strchr(cmd, '/')) {
         if (access(cmd, X_OK) == 0) {
-            return strdup(cmd);
+            static char result[1024];
+            strcpy(result, cmd);
+            return result;
         }
         return NULL;
     }
@@ -86,18 +104,31 @@ char* find_in_path(const char *cmd) {
     char *path_env = getenv("PATH");
     if (!path_env) return NULL;
     
-    char *path = strdup(path_env);
-    char *save_ptr = NULL;
-    char *dir = strtok_r(path, ":", &save_ptr);
+    // Copy PATH to modify
+    char *path = malloc(strlen(path_env) + 1);
+    strcpy(path, path_env);
     
     static char full_path[1024];
-    while (dir) {
-        snprintf(full_path, sizeof(full_path), "%s/%s", dir, cmd);
+    char *save_ptr = path;
+    
+    // Manual tokenization using strchr
+    while (*save_ptr) {
+        // Find end of directory (: or \0)
+        char *colon = strchr(save_ptr, ':');
+        size_t dir_len = colon ? (size_t)(colon - save_ptr) : strlen(save_ptr);
+        
+        // Build full path
+        strncpy(full_path, save_ptr, dir_len);
+        full_path[dir_len] = '/';
+        strcpy(full_path + dir_len + 1, cmd);
+        
         if (access(full_path, X_OK) == 0) {
             free(path);
-            return strdup(full_path);
+            return full_path;
         }
-        dir = strtok_r(NULL, ":", &save_ptr);
+        
+        if (!colon) break;
+        save_ptr = colon + 1;
     }
     free(path);
     return NULL;
