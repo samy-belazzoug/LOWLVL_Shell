@@ -1,35 +1,33 @@
-# Variables de configuration
+# Configuration variables
 CC = gcc
-CFLAGS = -Wall -Wextra -Iheader
-TARGET = exe/nanoshell
+CFLAGS = -Wall -Wextra -Werror -Iheader
+TARGET = src/nanoshell
 SRC = nanoshell.c imp/ns_imp.c
 OBJ = $(SRC:.c=.o)
 
-# Règle par défaut
+# Default rule
 all: $(TARGET)
 
-# Compilation de l'exécutable
+# Compilation of the executable
 $(TARGET): $(OBJ)
-	@mkdir -p exe
 	$(CC) $(CFLAGS) -o $@ $^
-	@echo "Compilation sucess : $(TARGET)"
+	@echo "Compilation successful: $(TARGET)"
 
-# Compilation des fichiers objets
+# Object file compilation
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
-
 
 # Object file cleaning
 clean:
 	rm -f $(OBJ)
-	@echo "Object files cleaned"
+	@echo "Object files removed"
 
-# Nettoyage complet
+# Complete cleaning
 fclean: clean
 	rm -f $(TARGET)
-	@echo "Complete cleaned done."
+	@echo "Complete cleaning done."
 
-# Recompilation complète
+# Complete recompilation
 re: fclean all
 
 .PHONY: all clean fclean re
