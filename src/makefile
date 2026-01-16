@@ -1,7 +1,7 @@
 # Configuration variables
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -Iheader
-TARGET = src/nanoshell
+TARGET = nanoshell
 SRC = nanoshell.c imp/ns_imp.c
 OBJ = $(SRC:.c=.o)
 
